@@ -1,0 +1,57 @@
+services:
+  api:
+    container_name: nest-jsexercise
+    build: ./nest-jsexercise
+    command: npm run start:dev
+    ports:
+      - "3001:3000"
+    volumes:
+      - './app:/usr/src/app'
+    # Run a command against the development stage of the image
+    environment: 
+      # DATABASE_URL: postgres://user:password@postgres:5432/db
+      NODE_ENV: development
+      PORT: 3002
+    depends_on:
+      - db
+      - minio
+  app:
+    container_name: sathapana-next-js
+    build: ./sathapana-next-js
+    volumes:
+      - './app:/usr/src/app'
+    command: npm run dev
+    ports:
+      - "3002:3000"
+    environment:
+      NODE_ENV: development
+  db:
+    image: postgres:14.7
+    ports:
+      - 5435:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123
+      POSTGRES_DB: nest
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+  minio:
+    container_name: minio
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9090:9090"
+    environment:
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+    command: server /data/app --console-address ":9090"
+    volumes:
+      - minio-data:/data
+volumes:
+  minio-data:
+networks:
+  default:
+
